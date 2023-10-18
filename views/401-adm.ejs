@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', { title: 'Não encontrado !' }) %>
+
+    <link rel="stylesheet" href="/styles/erro.css" />
+  </head>
+
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <h1>PROIBIDO !</h1>
+      <img id="power" src="/images/power.jpg" alt="" />
+      <h2>Exclusivo para <span class="red">administradores</span> !</h2>
+      <p style="font-weight: bold">Erro 401</p>
+      <a href="/" class="red-alert">Voltar</a>
+    </main>
+
+    <footer><%- include('includes/footer') %></footer>
+  </body>
+</html>

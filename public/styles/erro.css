@@ -1,0 +1,62 @@
+main {
+  margin: 3rem;
+}
+
+main p {
+  font-size: 2rem;
+}
+
+main h1 {
+  font-size: 3rem;
+  color: crimson;
+  font-weight: bold;
+}
+
+main a {
+  padding: 10px 25px;
+  color: rgba(17, 17, 161, 0.699);
+  font-weight: bold;
+  display: block;
+  font-size: 2rem;
+  margin: 2rem;
+}
+
+main a:hover {
+  color: rgba(46, 46, 158, 0.699);
+}
+
+.red {
+  color: crimson;
+  font-weight: bold;
+  border-bottom: 1px solid black;
+}
+.red-alert {
+  color: red;
+  font-weight: bold;
+  margin: 25px;
+}
+
+.red-alert:hover {
+  color: rgb(201, 85, 108);
+}
+
+.blue-info {
+  color: blue;
+  font-weight: bold;
+}
+
+#power {
+  width: 25%;
+  border-radius: 15%;
+  box-shadow: 1px 1px 1px crimson;
+  cursor: not-allowed;
+}
+
+#power:hover {
+  box-shadow: 10px 10px 10px crimson;
+}
+
+h2 {
+  margin-top: 1rem;
+  font-size: 2rem;
+}

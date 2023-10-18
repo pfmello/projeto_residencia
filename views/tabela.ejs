@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: 'Tabela de Retirada e Saída Veículos'})
+    %>
+    <script src="/script/tabela.js" defer></script>
+  </head>
+  <body>
+    <header id="main-header"><%- include('includes/header') %></header>
+    <div id="backdrop"></div>
+
+    <main>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th colspan="3">Tabela de Retirada e Saída de Veículos</th>
+              <th>
+                <i id="add" class="btn_add material-icons button delete">add</i>
+              </th>
+            </tr>
+            <tr>
+              <th>Data Retirada</th>
+              <th>Hora Retirada</th>
+              <th>Placa</th>
+              <th>Nome</th>
+              <th>Setor</th>
+              <th>Destino</th>
+              <th>KM Ret.</th>
+              <th>Ass. Ret.</th>
+              <th>Data Devolução</th>
+              <th>Hora Devolução</th>
+              <th>KM Dev.</th>
+              <th>Ass. Dev.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Inicia loop para pegar dados do banco de dados MongoDB -->
+            <% for(const dado of data) { %>
+
+            <tr>
+              <td><%= dado.data_retirada %></td>
+              <td><%= dado.hora_retirada %> H</td>
+              <td><%= dado.plate.register %></td>
+              <td><%= dado.driver.firstName %></td>
+              <td><%= dado.sector.abv %></td>
+              <td><%= dado.destino %></td>
+              <td><%= dado.plate.km_ret %></td>
+              <td><%= dado.ass_ret %></td>
+              <td><%= dado.data_devolucao %></td>
+              <td><%= dado.hora_devolucao %> H</td>
+              <td><%= dado.plate.km_dev %></td>
+              <td><%= dado.ass_dev %></td>
+
+              <td>
+                <form action="/tabela/<%= dado._id %>/delete" method="POST">
+                  <a
+                    href="/tabela/<%= dado._id%>/edit"
+                    class="material-icons button edit"
+                    >edit</a
+                  >
+
+                  <button
+                    type="submit"
+                    class="material-icons button delete"
+                    id="delete-button"
+                    onClick="return confirmSubmit()"
+                  >
+                    delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <!-- Fim do loop -->
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- Formulário de adicionar elemento na tabela -->
+    <section id="add_form">
+      <form action="/tabela" method="POST" id="add_row_form" class="modal">
+        <div class="data-hora">
+          <label for="data_retirada">Data Retirada</label>
+          <input type="date" id="data_retirada" name="data_retirada" required />
+
+          <label for="hora_retirada">Hora Retirada</label>
+          <input type="time" id="hora_retirada" name="hora_retirada" required />
+        </div>
+
+        <label for="plate">Placa e Km Retirada</label>
+        <select name="plate" id="plate" required>
+          <% for (const plate of plates) { %>
+          <option value="<%= plate._id %>">
+            <%= plate.register %> - <%= plate.km_dev %> Kms atuais
+          </option>
+          <% } %>
+        </select>
+
+        <label for="driver">Motorista</label>
+        <select name="driver" id="driver" required>
+          <% for (const driver of drivers) { %>
+          <option value="<%= driver._id %>"><%= driver.firstName %></option>
+          <% } %>
+        </select>
+
+        <label for="sector">Setor</label>
+        <select id="sector" name="sector" required>
+          <% for (const sector of sectors) { %>
+          <option value="<%= sector._id %>"><%= sector.abv %></option>
+          <% } %>
+        </select>
+
+        <label for="destino">Destino</label>
+        <input type="text" id="destino" name="destino" required />
+        <!-- 
+        <label for="km_ret">KM Retirada</label>
+        <input type="number" name="km_ret" id="km_ret" required /> -->
+
+        <label for="ass_ret">Assinatura Retirada</label>
+        <input
+          type="text"
+          id="ass_ret"
+          name="ass_ret"
+          value="<%= userName %>"
+          disabled
+        />
+        <hr />
+        <div class="data-hora">
+          <label for="data_devolucao">Data Devolução</label>
+          <input
+            type="date"
+            id="data_devolucao"
+            name="data_devolucao"
+            required
+          />
+
+          <label for="hora_devolucao">Hora Devolução</label>
+          <input
+            type="time"
+            name="hora_devolucao"
+            id="hora_devolucao"
+            required
+          />
+        </div>
+
+        <label for="km_dev">Km Devolução</label>
+        <input type="number" name="km_dev" id="km_dev" required />
+
+        <label for="ass_dev">Assinatura Devolução </label>
+        <input
+          type="text"
+          id="ass_dev"
+          name="ass_dev"
+          value="<%= userName %>"
+          disabled
+        />
+
+        <div id="buttons">
+          <button type="submit">Enviar</button>
+          <button type="reset">Resetar</button>
+          <button type="button" id="cancel_btn">Cancelar</button>
+        </div>
+      </form>
+    </section>
+
+    <footer><%- include('includes/footer') %></footer>
+  </body>
+</html>

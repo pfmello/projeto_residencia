@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', { title: 'Não encontrado !' }) %>
+
+    <link rel="stylesheet" href="/styles/erro.css" />
+  </head>
+
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <h1>PROIBIDO !</h1>
+      <p>Usuário não autenticado !</p>
+      <p style="font-weight: bold">Erro 401</p>
+      <a href="/">Voltar</a>
+    </main>
+
+    <footer><%- include('includes/footer') %></footer>
+  </body>
+</html>

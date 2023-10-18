@@ -1,0 +1,20 @@
+span {
+  color: blue;
+  font-weight: bold;
+  cursor: help;
+}
+
+#user-panel button {
+  width: 8rem;
+}
+
+#adm-span {
+  font-weight: bold;
+  color: crimson;
+}
+
+h3 {
+  text-decoration: underline;
+  margin-top: 1rem;
+  color: darkslategrey;
+}

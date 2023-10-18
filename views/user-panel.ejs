@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', { title: 'Painel de Usuário !' }) %>
+    <link rel="stylesheet" href="/styles/login.css" />
+    <link rel="stylesheet" href="/styles/user-panel.css" />
+    <script src="/script/user-panel.js" defer></script>
+  </head>
+
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main id="user-panel">
+      <h1>Bem-vindo ao painel de usuário !</h1>
+      <h2>Seu login é: <span><%= thisUser.login %></span></h2>
+      <h2>Seu email é: <span><%= thisUser.email %></span></h2>
+
+      <% if(isAdmin) { %>
+      <h3>
+        Você é um <span id="adm-span">administrador</span> e possui acesso total
+        !
+      </h3>
+      <button id="adm-btn">Painel ADM</button>
+      <% } %>
+
+      <button id="logout-btn">Logout</button>
+    </main>
+
+    <footer><%- include('includes/footer') %></footer>
+  </body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', { title: 'Home' }) %>
+    <link rel="stylesheet" href="/styles/login.css" />
+    <script src="/script/jquery.js"></script>
+    <script src="/script/login.js" defer></script>
+    <script src="/script/register-check.js" defer></script>
+  </head>
+
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <div class="login-page">
+        <div class="form">
+          <form class="register-form" action="/register" method="POST">
+            <input
+              type="text"
+              placeholder="Usuário"
+              required
+              minlength="5"
+              name="login"
+            />
+            <input
+              type="password"
+              placeholder="Senha"
+              required
+              minlength="6"
+              id="password"
+              name="password"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              required
+              minlength="5"
+              id="email"
+              name="email"
+            />
+            <input
+              type="email"
+              placeholder="Confirme Email"
+              required
+              minlength="5"
+              id="email-confirm"
+              name="email-confirm"
+            />
+            <button>Cadastrar</button>
+            <p class="message">Já registrado ? <a href="#">Entrar</a></p>
+          </form>
+          <form class="login-form" action="/login" method="POST">
+            <input
+              type="text"
+              placeholder="Usuário"
+              required
+              minlength="5"
+              id="logon"
+              name="logon"
+            />
+            <input
+              type="password"
+              placeholder="Senha"
+              required
+              minlength="6"
+              id="logonpw"
+              name="logonpw"
+            />
+            <button class="btn-grad">Entrar</button>
+            <p class="message">
+              Não registrado ? <a href="#">Criar uma conta</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer><%- include('includes/footer') %></footer>
+  </body>
+</html>

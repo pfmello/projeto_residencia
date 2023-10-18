@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: "Placas"}) %>
+    <script src="/script/tabela.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <!--  -->
+      <%- include('includes/header') %>
+      <!--  -->
+      <link rel="stylesheet" href="/styles/modal-conf.css" />
+    </header>
+    <div id="backdrop"></div>
+    <main>
+      <h1>Controle de Placas</h1>
+      <table>
+        <thead>
+          <th>Placas Cadastradas</th>
+          <th>
+            <i id="add" class="btn_add material-icons button delete">add</i>
+          </th>
+        </thead>
+        <tr>
+          <th>Placa</th>
+          <th>Km atual</th>
+        </tr>
+
+        <!--  -->
+        <% for (placa of placas) { %>
+        <!--  -->
+        <tr>
+          <td><%= placa.register %></td>
+          <td><%= placa.km_dev %></td>
+          <td>
+            <form action="/placas/<%= placa._id %>/delete" method="POST">
+              <a
+                href="/placas/<%= placa._id %>/edit"
+                class="material-icons button edit"
+                >edit</a
+              >
+
+              <button
+                type="submit"
+                class="material-icons button delete"
+                id="delete-button"
+                onClick="return confirmSubmit()"
+              >
+                delete
+              </button>
+            </form>
+          </td>
+        </tr>
+        <!--  -->
+        <% }%>
+      </table>
+
+      <section id="add_form">
+        <form action="/placas" method="POST" id="add_row_form" class="modal">
+          <label for="">Placa</label>
+          <input type="text" minlength="4" name="register" required />
+          <label for="">Quilometragem Atual</label>
+          <input type="number" name="km_dev" min="0" required />
+
+          <div id="buttons">
+            <button type="submit">Enviar</button>
+            <button type="reset">Resetar</button>
+            <button type="button" id="cancel_btn">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

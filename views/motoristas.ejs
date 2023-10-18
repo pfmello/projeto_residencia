@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: "Motoristas"}) %>
+    <script src="/script/tabela.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <!--  -->
+      <%- include('includes/header') %>
+      <!--  -->
+      <link rel="stylesheet" href="/styles/modal-conf.css" />
+    </header>
+    <div id="backdrop"></div>
+    <main>
+      <h1>Controle de Motoristas</h1>
+      <table>
+        <thead>
+          <th>Motoristas Cadastrados</th>
+          <th>
+            <i id="add" class="btn_add material-icons button delete">add</i>
+          </th>
+        </thead>
+        <tr>
+          <th>Nome</th>
+          <th>Sobrenome</th>
+        </tr>
+
+        <!--  -->
+        <% for (motorista of motoristas) { %>
+        <!--  -->
+        <tr>
+          <td><%= motorista.firstName %></td>
+          <td><%= motorista.surname %></td>
+          <td>
+            <form
+              action="/motoristas/<%= motorista._id %>/delete"
+              method="POST"
+            >
+              <a
+                href="/motorista/<%= motorista._id%>/edit"
+                class="material-icons button edit"
+                >edit</a
+              >
+
+              <button
+                type="submit"
+                class="material-icons button delete"
+                id="delete-button"
+                onClick="return confirmSubmit()"
+              >
+                delete
+              </button>
+            </form>
+          </td>
+        </tr>
+        <!--  -->
+        <% }%>
+      </table>
+
+      <section id="add_form">
+        <form
+          action="/motoristas"
+          method="POST"
+          id="add_row_form"
+          class="modal"
+        >
+          <label for="">Nome</label>
+          <input type="text" name="firstName" minlength="4" required />
+          <label for="">Sobrenome</label>
+          <input type="text" name="surname" minlength="3" required />
+
+          <div id="buttons">
+            <button type="submit">Enviar</button>
+            <button type="reset">Resetar</button>
+            <button type="button" id="cancel_btn">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

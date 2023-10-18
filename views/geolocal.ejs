@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('includes/head', {title: "Editar Setor"}) %>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="/styles/geolocal.css" />
+
+    <script
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      defer
+    ></script>
+    <script src="/script/geolocal.js" defer></script>
+  </head>
+  <body>
+    <header><%- include('includes/header') %></header>
+
+    <main>
+      <div></div>
+      <section id="geolocal">
+        <button class="custom-btn btn-3"><span>Geolocalizar</span></button>
+
+        <div id="map-info">
+          <p>A latitude é <span id="latitude"></span></p>
+          <p class="bottom-margin">
+            A longitude é <span id="longitude"></span>
+          </p>
+          <p></p>
+          <div id="map" style="height: 500px; width: 33%; margin: auto"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

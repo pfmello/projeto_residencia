@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: "Editar Motorista"}) %>
+  </head>
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <h1>Editando <%= motorista.firstName %></h1>
+
+      <form
+        action="/motoristas/<%= motorista._id %>/edit"
+        method="POST"
+        id="add_row_form"
+      >
+        <label for="">Nome do Motorista</label>
+        <input
+          type="text"
+          value="<%= motorista.firstName %>"
+          name="firstName"
+        />
+        <label for="">Sobrenome</label>
+        <input type="text" value="<%= motorista.surname %>" name="surname" />
+
+        <button type="submit">Enviar</button>
+      </form>
+    </main>
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', { title: 'Erro !' }) %>
+
+    <link rel="stylesheet" href="/styles/erro.css" />
+  </head>
+
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <h1>Erro de km !</h1>
+      <p>KM de devolução não pode ser menor que o de retirada !</p>
+      <p class="red-alert">Deve ser maior do que <%= erro %> kms !</p>
+      <a href="/tabela">Voltar</a>
+    </main>
+
+    <footer><%- include('includes/footer') %></footer>
+  </body>
+</html>

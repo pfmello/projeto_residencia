@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: "Painel do ADM"}) %>
+    <script src="/script/tabela.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <!--  -->
+      <%- include('includes/header') %>
+      <!--  -->
+      <link rel="stylesheet" href="/styles/modal-conf.css" />
+    </header>
+    <div id="backdrop"></div>
+    <main>
+      <h1>Controle de Usuários</h1>
+      <table>
+        <thead>
+          <th>Usuários Cadastrados</th>
+        </thead>
+        <tr>
+          <th>Login</th>
+          <th>Email</th>
+          <th>Admin</th>
+        </tr>
+
+        <!--  -->
+        <% for (user of users) { %>
+        <!--  -->
+        <tr>
+          <td><%= user.login %></td>
+          <td><%= user.email %></td>
+          <td>
+            <% if(user.isAdmin) { %>
+            <a
+              href="/motorista/edit"
+              class="material-icons button edit"
+              onClick="return confirmAdmin()"
+              >done</a
+            >
+            <% } else { %>
+            <a
+              href="/motorista/edit"
+              class="material-icons button delete"
+              onClick="return confirmAdmin()"
+              >cancel</a
+            >
+            <% } %>
+          </td>
+          <td>
+            <form action="/motoristas/delete" method="POST">
+              <button
+                type="submit"
+                class="material-icons button delete"
+                id="delete-button"
+                onClick="return confirmSubmit()"
+              >
+                delete
+              </button>
+            </form>
+          </td>
+        </tr>
+        <!--  -->
+        <% }%>
+      </table>
+
+      <section id="add_form">
+        <form
+          action="/motoristas"
+          method="POST"
+          id="add_row_form"
+          class="modal"
+        >
+          <label for="">Nome</label>
+          <input type="text" name="firstName" minlength="4" required />
+          <label for="">Sobrenome</label>
+          <input type="text" name="surname" minlength="3" required />
+
+          <div id="buttons">
+            <button type="submit">Enviar</button>
+            <button type="reset">Resetar</button>
+            <button type="button" id="cancel_btn">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: "Editar Placa"}) %>
+  </head>
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <h1>Editando <%= placa.register %></h1>
+
+      <form
+        action="/placas/<%= placa._id %>/edit"
+        method="POST"
+        id="add_row_form"
+      >
+        <label for="">Registro da Placa</label>
+        <input type="text" value="<%= placa.register %>" name="register" />
+        <label for="">Quilometragem Atual</label>
+        <input
+          type="number"
+          value="<%= placa.km_dev %>"
+          name="km_dev"
+          min="<%= placa.km_dev %>"
+        />
+
+        <button type="submit">Enviar</button>
+      </form>
+    </main>
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

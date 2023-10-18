@@ -1,0 +1,58 @@
+Usar o comando "npm start" no CMD para iniciar o webserver ( padrão no endereço 127.0.0.1:3000 )
+
+
+Pastas: 
+data/database.js
+- Arquivo que configura a conexão com o MongoDB (na tabela chamada "tabela")
+
+/public
+- contém todos os arquivos estáticos (CSS, scripts, imagens)
+/public/images
+/public/styles
+/public/script
+
+/routes
+- contém todas as rotas do webserver
+
+/views
+- contém todas as páginas HTML do servidor (em formato EJS)
+
+-app.js
+Todas as configurações do servidor
+
+Inicia com npm start no CMD
+Abrir o navegador na rota configurada pelo app.listen() // padrão 3000
+
+<-- Variaveis do Formulário -->
+data_retirada
+hora_retirada
+plate (register, km_ret, km_dev)
+driver (firstName, surname)
+sector (sector._id, sector.name, sector.abv)
+destino
+km_ret
+ass_ret
+data_devolucao
+hora_devolucao
+km_dev
+ass_dev
+
+MongoDB
+DB -> tabela (show dbs)
+	Collections (show collections)
+	collection: data
+	collection: sectors
+
+Queries do Banco de dados
+(arquivo mongosh.exe)
+-> localhost para conectar com o banco de dados local
+use tabela
+db.sector.insertOne({name: "Setor exemplo" })
+db.data.insertOne({data_retirada: "29/08", hora_retirada: "16", placa: "SEA-9E59", nome: "Fabrizio", sector: {_id:  ObjectId("64ff75e6ecf3aa6b2a5f3b9e"), name: "GAB"}, destino: "Ponta Grossa", km_ret: 10782, ass_ret: "---", data_devolucao: "30/08", hora_devolucao: "14", km_dev: "---", ass_dev: "---"})
+
+tela de cadastro
+salvar geolocalização
+
+
+
+db.sectors.updateOne({"name": "CDTD"}, {$set: {"abv":"teste"} })
