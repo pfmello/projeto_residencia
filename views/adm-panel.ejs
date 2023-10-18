@@ -14,6 +14,10 @@
     <div id="backdrop"></div>
     <main>
       <h1>Controle de Usuários</h1>
+      <p>
+        Como administrador, você pode deletar dados e tornar outros usuários
+        administradores
+      </p>
       <table>
         <thead>
           <th>Usuários Cadastrados</th>
@@ -33,14 +37,14 @@
           <td>
             <% if(user.isAdmin) { %>
             <a
-              href="/motorista/edit"
+              href="/<%= user._id %>/remove_adm"
               class="material-icons button edit"
               onClick="return confirmAdmin()"
               >done</a
             >
             <% } else { %>
             <a
-              href="/motorista/edit"
+              href="/<%= user._id %>/make_adm"
               class="material-icons button delete"
               onClick="return confirmAdmin()"
               >cancel</a
@@ -48,7 +52,7 @@
             <% } %>
           </td>
           <td>
-            <form action="/motoristas/delete" method="POST">
+            <form action="/<%= user._id %>/remove_user" method="POST">
               <button
                 type="submit"
                 class="material-icons button delete"

@@ -188,9 +188,9 @@ router.get("/logout", function (req, res) {
 });
 
 router.get("/adm", async function (req, res) {
-  const admuser = await checkAdm(req);
+  const admUser = await checkAdm(req);
 
-  if (admuser) {
+  if (admUser) {
     const admLogin = req.session.user.login;
     console.log(
       `O adm de login: ${admLogin} está acessando o painel de usuário !`
@@ -199,13 +199,110 @@ router.get("/adm", async function (req, res) {
     const users = await db
       .getDb()
       .collection("users")
-      .find({}, { projection: { login: 1, email: 1, isAdmin: 1, _id: 0 } })
+      .find({}, { projection: { login: 1, email: 1, isAdmin: 1, _id: 1 } })
       .toArray();
 
     return res.render("adm-panel", { users });
   } else {
     console.log("Alguém que não é adm tentou acessar o painel de adm !");
     return res.status(401).render("401-adm");
+  }
+});
+
+router.get("/:id/make_adm", async function (req, res) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let userId = req.params.id;
+
+  try {
+    userId = new ObjectId(userId);
+
+    const result = await db
+      .getDb()
+      .collection("users")
+      .updateOne({ _id: userId }, { $set: { isAdmin: true } });
+
+    if (result.modifiedCount === 1) {
+      console.log("Usuario foi colocado como admin!");
+    } else {
+      console.log("Nenhum usuário foi modificado. Verifique o ID.");
+    }
+
+    res.redirect("/adm");
+  } catch (error) {
+    console.log("Erro ao tentar remover um usuário como administrador:");
+    res.status(500).render("505");
+  }
+});
+
+router.get("/:id/remove_adm", async function (req, res) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let userId = req.params.id;
+
+  try {
+    userId = new ObjectId(userId);
+
+    const result = await db
+      .getDb()
+      .collection("users")
+      .updateOne({ _id: userId }, { $set: { isAdmin: false } });
+
+    if (result.modifiedCount === 1) {
+      console.log("Usuario foi removido como admin!");
+    } else {
+      console.log("Nenhum usuário foi modificado. Verifique o ID.");
+    }
+
+    res.redirect("/adm");
+  } catch (error) {
+    console.log("Erro ao tentar remover um usuário como administrador:");
+    res.status(500).render("505");
+  }
+});
+
+router.post("/:id/remove_user", async function (req, res) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let dataToRemove = req.params.id;
+
+  try {
+    dataToRemove = new ObjectId(dataToRemove);
+
+    await db.getDb().collection("users").deleteOne({ _id: dataToRemove });
+    res.redirect("/adm");
+  } catch (error) {
+    console.log("Erro ao tentar remover um usuário");
+    res.status(500).render("505");
+  }
+});
+
+router.post("/:id/change_password", async function (req, res) {
+  let userId = req.params.id;
+  let formData = req.body;
+
+  try {
+    userId = new ObjectId(userId);
+    const insertedPassword = formData.password;
+    const newPassword = formData["new-password"];
+
+    const userToEdit = await db
+      .getDb()
+      .collection("users")
+      .findOne({ _id: userId });
+    const oldPassword = userToEdit.password;
+
+    console.log(oldPassword);
+    console.log(newPassword);
+
+    const validPassword = await bcrypt.compare(insertedPassword, oldPassword);
+    console.log(validPassword);
+  } catch (error) {
+    console.log("Erro ao tentar alterar senha !");
+    return res.status(500).render("500");
   }
 });
 
@@ -294,8 +391,17 @@ router.post("/tabela", async function (req, res) {
   }
 });
 
-router.post("/tabela/:id/delete", async function (req, res) {
-  const dataId = new ObjectId(req.params.id);
+router.post("/tabela/:id/delete", async function (req, res, next) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let dataId = req.params.id;
+
+  try {
+    dataId = new ObjectId(dataId);
+  } catch (error) {
+    return next(error);
+  }
 
   const query = await db.getDb().collection("data").deleteOne({ _id: dataId });
 
@@ -303,17 +409,20 @@ router.post("/tabela/:id/delete", async function (req, res) {
 });
 
 router.get("/tabela/:id/edit", async function (req, res) {
-  const editId = new ObjectId(req.params.id);
+  let editId = req.params.id;
 
-  const dataToEdit = await db
-    .getDb("tabela")
-    .collection("data")
-    .findOne({ _id: editId });
+  try {
+    editId = new ObjectId(editId);
 
-  if (!dataToEdit) {
+    const dataToEdit = await db
+      .getDb("tabela")
+      .collection("data")
+      .findOne({ _id: editId });
+
+    res.render("editar", { dado: dataToEdit });
+  } catch (error) {
     return res.status(404).render("404");
   }
-  res.render("editar", { dado: dataToEdit });
 });
 
 // Rotas da página de setores
@@ -335,8 +444,17 @@ router.post("/setores", async function (req, res) {
   res.redirect("/setores");
 });
 
-router.post("/setores/:id/delete", async function (req, res) {
-  const dataId = new ObjectId(req.params.id);
+router.post("/setores/:id/delete", async function (req, res, next) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let dataId = req.params.id;
+
+  try {
+    dataId = new ObjectId(dataId);
+  } catch (error) {
+    return next(error);
+  }
 
   const query = await db
     .getDb()
@@ -405,8 +523,17 @@ router.post("/motoristas", async function (req, res) {
   res.redirect("/motoristas");
 });
 
-router.post("/motoristas/:id/delete", async function (req, res) {
-  const dataId = new ObjectId(req.params.id);
+router.post("/motoristas/:id/delete", async function (req, res, next) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let dataId = req.params.id;
+
+  try {
+    dataId = new ObjectId(dataId);
+  } catch (error) {
+    return next(error);
+  }
 
   const query = await db
     .getDb()
@@ -475,8 +602,17 @@ router.post("/placas", async function (req, res) {
   res.redirect("/placas");
 });
 
-router.post("/placas/:id/delete", async function (req, res) {
-  const dataId = new ObjectId(req.params.id);
+router.post("/placas/:id/delete", async function (req, res, next) {
+  const admUser = await checkAdm(req);
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let dataId = req.params.id;
+
+  try {
+    dataId = new ObjectId(dataId);
+  } catch (error) {
+    return next(error);
+  }
 
   const query = await db
     .getDb()

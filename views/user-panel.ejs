@@ -4,11 +4,15 @@
     <%- include('includes/head', { title: 'Painel de Usuário !' }) %>
     <link rel="stylesheet" href="/styles/login.css" />
     <link rel="stylesheet" href="/styles/user-panel.css" />
+    <link rel="stylesheet" href="/styles/modal-conf.css" />
+
     <script src="/script/user-panel.js" defer></script>
   </head>
 
   <body>
     <header><%- include('includes/header') %></header>
+    <div id="backdrop"></div>
+
     <main id="user-panel">
       <h1>Bem-vindo ao painel de usuário !</h1>
       <h2>Seu login é: <span><%= thisUser.login %></span></h2>
@@ -22,8 +26,49 @@
       <button id="adm-btn">Painel ADM</button>
       <% } %>
 
+      <button id="pw-btn">Trocar Senha</button>
       <button id="logout-btn">Logout</button>
     </main>
+
+    <section id="add_form">
+      <form
+        action="/<%= thisUser.id %>/change_password"
+        method="POST"
+        id="add_row_form"
+        class="modal"
+      >
+        <label for="">Senha Atual</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          minlength="6"
+          required
+        />
+        <label for="">Nova Senha</label>
+        <input
+          type="password"
+          id="new-password"
+          name="new-password"
+          minlength="6"
+          required
+        />
+        <label for="">Confirme a Nova Senha</label>
+        <input
+          type="password"
+          id="confirm-password"
+          name="confirm-password"
+          minlength="6"
+          required
+        />
+
+        <div id="buttons">
+          <button type="submit">Enviar</button>
+          <button type="reset">Resetar</button>
+          <button type="button" id="cancel_btn">Cancelar</button>
+        </div>
+      </form>
+    </section>
 
     <footer><%- include('includes/footer') %></footer>
   </body>
