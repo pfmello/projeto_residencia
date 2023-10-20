@@ -377,6 +377,27 @@ router.get("/tabela", async function (req, res) {
       db.getDb().collection("plates").find().toArray(),
     ]);
 
+    // Convertendo as datas para o formato correto
+    for (const td of data) {
+      let firstDateToConvert = new Date(td.data_retirada + "T00:00:00Z"); // Convert to UTC
+      let returnDateToConvert = new Date(td.data_devolucao + "T00:00:00Z"); // Convert to UTC
+
+      firstDateToConvert.setDate(firstDateToConvert.getUTCDate()); // Set day based on UTC
+      returnDateToConvert.setDate(returnDateToConvert.getUTCDate()); // Set day based on UTC
+
+      td.data_retirada = firstDateToConvert.toLocaleDateString("pt-BR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+
+      td.data_devolucao = returnDateToConvert.toLocaleDateString("pt-BR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    }
+
     const userName = req.session.user.login;
 
     res.render("tabela", { sectors, drivers, data, plates, userName });
