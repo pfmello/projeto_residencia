@@ -13,24 +13,28 @@
         method="POST"
         id="add_row_form"
       >
-        <label for="">Nome do Setor</label>
+        <label for="name">Nome do Setor</label>
         <input
           type="text"
           value="<%= setor.name %>"
           name="name"
+          id="name"
           required
           minlength="4"
         />
-        <label for="">Abreviação</label>
+        <label for="abv">Abreviação</label>
         <input
           type="text"
           value="<%= setor.abv %>"
           name="abv"
+          id="abv"
           required
           min="2"
         />
 
-        <button type="submit">Enviar</button>
+        <div id="buttons">
+          <button type="submit">Enviar</button>
+        </div>
       </form>
     </main>
     <footer><%- include ('includes/footer') %></footer>

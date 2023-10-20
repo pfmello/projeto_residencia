@@ -17,14 +17,15 @@
       <h1>Bem-vindo ao painel de usuário !</h1>
       <h2>Seu login é: <span><%= thisUser.login %></span></h2>
       <h2>Seu email é: <span><%= thisUser.email %></span></h2>
-
       <% if(isAdmin) { %>
+      <!--  -->
+
       <h3>
         Você é um <span id="adm-span">administrador</span> e possui acesso total
         !
       </h3>
-      <button id="adm-btn">Painel ADM</button>
       <% } %>
+      <button id="adm-btn">Painel ADM</button>
 
       <button id="pw-btn">Trocar Senha</button>
       <button id="logout-btn">Logout</button>

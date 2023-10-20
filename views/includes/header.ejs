@@ -1,4 +1,9 @@
-<a href="/" id="logo">Início</a>
+<div>
+  <a href="/" id="home-btn" class="material-icons button edit">home</a>
+  <% if(locals.isAuth) {%>
+  <span class="welcome-message">Olá, <%= locals.username %> !</span>
+  <% } %>
+</div>
 <nav id="main-nav">
   <ul>
     <li><a href="/tabela">Tabela</a></li>
@@ -6,6 +11,10 @@
     <li><a href="/motoristas">Motoristas</a></li>
     <li><a href="/placas">Placas</a></li>
     <li><a href="/geolocal">Geolocal</a></li>
+
+    <% if(locals.isAuth) {%>
+    <li><a href="/logout">Sair</a></li>
+    <% } %>
   </ul>
 </nav>
 <a href="#side-drawer" class="menu-btn">

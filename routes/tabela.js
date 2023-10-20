@@ -8,66 +8,56 @@ const ObjectId = mongodb.ObjectId;
 
 const router = express.Router();
 
-function userAuthenticated(req) {
-  const autenticado = req.session.isAuthenticated;
-
-  return autenticado;
-}
-
-async function checkAdm(req) {
-  const thisUser = req.session.user;
-
-  if (!thisUser) return false;
-
-  try {
-    const dataInfo = await db
-      .getDb()
-      .collection("users")
-      .findOne({ _id: thisUser.id });
-
-    if (dataInfo && dataInfo.isAdmin) return true;
-    else return false;
-  } catch (error) {
-    console.error("Erro na função checkAdm:", error);
-    return false;
-  }
-}
-
 // Página INDEX, redireciona para a rota de /tabela
 router.get("/", async function (req, res) {
-  const autenticado = req.session.isAuthenticated;
+  let sessionInputData = req.session.inputData;
+
+  if (!sessionInputData) {
+    sessionInputData = {
+      savedLogin: "",
+      savedPassword: "",
+    };
+  }
+
+  const autenticado = res.locals.isAuth;
   const thisUser = req.session.user;
 
   if (autenticado) {
-    const checkUser = await db
-      .getDb()
-      .collection("users")
-      .findOne({ _id: req.session.user.id });
-    const admin = checkUser.isAdmin;
-
+    const admin = res.locals.isAdmin;
     res.render("user-panel", { thisUser, isAdmin: admin });
   } else {
-    res.render("index");
+    res.render("index", { inputData: sessionInputData });
   }
 });
 
 // Sistema login e senha
 router.post("/register", async function (req, res) {
   const userData = req.body;
+
+  if (Object.keys(userData).length === 0) {
+    // userData is an empty object
+    console.log("User data is empty.");
+    return res.status(500).render("500");
+  } else {
+    // userData is not empty
+    console.log("User data is not empty.");
+  }
+
   const enteredLogin = userData.login;
   const enteredPassword = userData.password;
   const enteredEmail = userData.email;
   const enteredConfirmEmail = userData["email-confirm"];
 
-  function containsUppercase(password) {
-    return /[A-Z]/.test(password);
+  //Função que verifica se tem uppercase e número
+  function containsUppercaseAndNumber(password) {
+    return /[A-Z]/.test(password) && /\d/.test(password);
   }
 
   // Condição de verificação de requisitos dos dados
   if (
     enteredEmail != enteredConfirmEmail ||
     enteredPassword.length < 6 ||
-    !containsUppercase(enteredPassword)
+    !containsUppercaseAndNumber(enteredPassword)
   ) {
     return res.status(500).render("500");
   }
@@ -89,15 +79,13 @@ router.post("/register", async function (req, res) {
     return renderRegisterInfo(
       "Errou !",
       "Esse usuário já existe !",
-      "Tente novamente com outro nome de usuário !",
-      null
+      "Tente novamente com outro nome de usuário !"
     );
   } else if (existingEmail) {
     return renderRegisterInfo(
       "Errou !",
       "Já existe um usuário cadastrado com esse email !",
-      "Tente novamente com outro email !",
-      null
+      "Tente novamente com outro email !"
     );
   } else {
     try {
@@ -113,8 +101,7 @@ router.post("/register", async function (req, res) {
       return renderRegisterInfo(
         "Registrado com sucesso !",
         "Parabéns, você foi registrado !",
-        "Agora você pode ir no espelho bater palmas para si mesmo !",
-        enteredLogin
+        "Agora você pode ir no espelho bater palmas para si mesmo !"
       );
     } catch (error) {
       console.error("Erro ao inserir usuário:", error);
@@ -122,27 +109,32 @@ router.post("/register", async function (req, res) {
     }
   }
 
-  function renderRegisterInfo(title, h1Text, pText, login) {
+  function renderRegisterInfo(title, h1Text, pText) {
     return res.render("register-info", {
       title,
       h1Text,
       pText,
-      loginInfo: login,
     });
   }
 });
 
 router.post("/login", async function (req, res) {
   const userData = req.body;
+
+  if (!userData) return res.status(500).render("500");
+
   const enteredUser = userData.logon;
   const enteredPw = userData.logonpw;
 
+  // Checar se já existe usuário com omesmo nome
   const existingUser = await db
     .getDb()
     .collection("users")
     .findOne({ login: enteredUser });
 
   if (!existingUser) {
+    req.session.inputData = null;
+    req.session.save();
     return renderLoginInfo(
       "Erro !",
       "Acesso negado !",
@@ -153,6 +145,12 @@ router.post("/login", async function (req, res) {
   const validPassword = await bcrypt.compare(enteredPw, existingUser.password);
 
   if (!validPassword) {
+    req.session.inputData = {
+      savedLogin: enteredUser,
+    };
+
+    req.session.save();
+
     return renderLoginInfo(
       "Erro !",
       "Acesso negado !",
@@ -167,7 +165,13 @@ router.post("/login", async function (req, res) {
   };
   req.session.isAuthenticated = true;
 
+  req.session.inputData = {
+    savedLogin: enteredUser,
+    savedPassword: enteredPw,
+  };
+
   req.session.save(function () {
+    loginAttempts[req.ip] = 0;
     console.log(`Usuário ${existingUser.login} autenticado !`);
     return res.redirect("/");
   });
@@ -188,7 +192,7 @@ router.get("/logout", function (req, res) {
 });
 
 router.get("/adm", async function (req, res) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
 
   if (admUser) {
     const admLogin = req.session.user.login;
@@ -210,7 +214,7 @@ router.get("/adm", async function (req, res) {
 });
 
 router.get("/:id/make_adm", async function (req, res) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let userId = req.params.id;
@@ -224,20 +228,20 @@ router.get("/:id/make_adm", async function (req, res) {
       .updateOne({ _id: userId }, { $set: { isAdmin: true } });
 
     if (result.modifiedCount === 1) {
-      console.log("Usuario foi colocado como admin!");
+      console.log("Usuario foi colocado como admin !");
     } else {
       console.log("Nenhum usuário foi modificado. Verifique o ID.");
     }
 
     res.redirect("/adm");
   } catch (error) {
-    console.log("Erro ao tentar remover um usuário como administrador:");
+    console.log("Erro ao tentar colocar um usuário como administrador:");
     res.status(500).render("505");
   }
 });
 
 router.get("/:id/remove_adm", async function (req, res) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let userId = req.params.id;
@@ -264,7 +268,7 @@ router.get("/:id/remove_adm", async function (req, res) {
 });
 
 router.post("/:id/remove_user", async function (req, res) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let dataToRemove = req.params.id;
@@ -275,7 +279,7 @@ router.post("/:id/remove_user", async function (req, res) {
     await db.getDb().collection("users").deleteOne({ _id: dataToRemove });
     res.redirect("/adm");
   } catch (error) {
-    console.log("Erro ao tentar remover um usuário");
+    console.log("Erro ao tentar remover um usuário !");
     res.status(500).render("505");
   }
 });
@@ -286,6 +290,7 @@ router.post("/:id/change_password", async function (req, res) {
 
   try {
     userId = new ObjectId(userId);
+
     const insertedPassword = formData.password;
     const newPassword = formData["new-password"];
 
@@ -293,13 +298,34 @@ router.post("/:id/change_password", async function (req, res) {
       .getDb()
       .collection("users")
       .findOne({ _id: userId });
+
     const oldPassword = userToEdit.password;
 
-    console.log(oldPassword);
-    console.log(newPassword);
-
     const validPassword = await bcrypt.compare(insertedPassword, oldPassword);
-    console.log(validPassword);
+
+    if (!validPassword) {
+      return res.render("register-info", {
+        title: "Errou !",
+        h1Text: "Senha totalmente errada !",
+        pText: "Tente novamente !",
+      });
+    }
+
+    const finalPassword = await bcrypt.hash(newPassword, 12);
+
+    await db
+      .getDb()
+      .collection("users")
+      .updateOne({ _id: userId }, { $set: { password: finalPassword } });
+
+    req.session.user = null;
+    req.session.isAuthenticated = false;
+
+    return res.render("register-info", {
+      title: "Parabéns !",
+      h1Text: "Senha alterada com sucesso !",
+      pText: "Agora teste ela !",
+    });
   } catch (error) {
     console.log("Erro ao tentar alterar senha !");
     return res.status(500).render("500");
@@ -309,7 +335,7 @@ router.post("/:id/change_password", async function (req, res) {
 // Página da tabela
 router.get("/tabela", async function (req, res) {
   // Verifica se o usuário está autenticado
-  if (!userAuthenticated(req)) return res.status(401).render("401");
+  if (!res.locals.isAuth) return res.status(401).render("401");
 
   //Apenas com usuários autenticados
   try {
@@ -330,6 +356,8 @@ router.get("/tabela", async function (req, res) {
 
 // Método POST para envio do formulário
 router.post("/tabela", async function (req, res) {
+  if (!req.body) return res.status(500).render("500");
+
   const sectorId = new ObjectId(req.body.sector);
   const driverId = new ObjectId(req.body.driver);
   const plateId = new ObjectId(req.body.plate);
@@ -344,9 +372,10 @@ router.post("/tabela", async function (req, res) {
   const kmTabela = parseInt(selectedPlate.km_dev);
 
   if (kmUsuario >= kmTabela) {
-    const mensagem = `O km de usuario ${kmUsuario} é maior ou igual do que ${kmTabela} pois entao o if passou`;
+    // const mensagem = `O km de usuario ${kmUsuario} é maior ou igual do que ${kmTabela} pois entao o if passou`;
 
-    console.log(mensagem);
+    // console.log(mensagem);
+
     const newInfo = {
       data_retirada: req.body.data_retirada,
       hora_retirada: req.body.hora_retirada,
@@ -392,7 +421,7 @@ router.post("/tabela", async function (req, res) {
 });
 
 router.post("/tabela/:id/delete", async function (req, res, next) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let dataId = req.params.id;
@@ -427,7 +456,7 @@ router.get("/tabela/:id/edit", async function (req, res) {
 
 // Rotas da página de setores
 router.get("/setores", async function (req, res) {
-  if (!userAuthenticated(req)) return res.status(401).render("401");
+  if (!res.locals.isAuth) return res.status(401).render("401");
 
   const sectors = await db.getDb().collection("sectors").find().toArray();
 
@@ -439,13 +468,16 @@ router.post("/setores", async function (req, res) {
     name: req.body.name,
     abv: req.body.abv,
   };
+
+  if (!newInfo) return res.status(500).render("500");
+
   const query = await db.getDb().collection("sectors").insertOne(newInfo);
 
   res.redirect("/setores");
 });
 
 router.post("/setores/:id/delete", async function (req, res, next) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let dataId = req.params.id;
@@ -485,8 +517,14 @@ router.get("/setores/:id/edit", async function (req, res, next) {
   res.render("editar-setor", { setor: dataToEdit });
 });
 
-router.post("/setores/:id/edit", async function (req, res) {
-  const editId = new ObjectId(req.params.id);
+router.post("/setores/:id/edit", async function (req, res, next) {
+  let editId = req.params.id;
+
+  try {
+    editId = new ObjectId(editId);
+  } catch (error) {
+    return next(error);
+  }
 
   const query = await db
     .getDb()
@@ -506,7 +544,7 @@ router.post("/setores/:id/edit", async function (req, res) {
 
 // Rotas da Página de Motoristas
 router.get("/motoristas", async function (req, res) {
-  if (!userAuthenticated(req)) return res.status(401).render("401");
+  if (!res.locals.isAuth) return res.status(401).render("401");
 
   const drivers = await db.getDb().collection("drivers").find().toArray();
 
@@ -518,13 +556,16 @@ router.post("/motoristas", async function (req, res) {
     firstName: req.body.firstName,
     surname: req.body.surname,
   };
+
+  if (!newInfo) return res.status(500).render("500");
+
   const query = await db.getDb().collection("drivers").insertOne(newInfo);
 
   res.redirect("/motoristas");
 });
 
 router.post("/motoristas/:id/delete", async function (req, res, next) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let dataId = req.params.id;
@@ -564,8 +605,14 @@ router.get("/motorista/:id/edit", async function (req, res, next) {
   res.render("editar-motorista", { motorista: dataToEdit });
 });
 
-router.post("/motoristas/:id/edit", async function (req, res) {
-  const editId = new ObjectId(req.params.id);
+router.post("/motoristas/:id/edit", async function (req, res, next) {
+  let editId = req.params.id;
+
+  try {
+    editId = new ObjectId(editId);
+  } catch (error) {
+    return next(error);
+  }
 
   const query = await db
     .getDb()
@@ -585,7 +632,7 @@ router.post("/motoristas/:id/edit", async function (req, res) {
 
 // Rotas da Página de Placas
 router.get("/placas", async function (req, res) {
-  if (!userAuthenticated(req)) return res.status(401).render("401");
+  if (!res.locals.isAuth) return res.status(401).render("401");
 
   const plates = await db.getDb().collection("plates").find().toArray();
 
@@ -597,13 +644,16 @@ router.post("/placas", async function (req, res) {
     register: req.body.register,
     km_dev: req.body.km_dev,
   };
+
+  if (!newInfo) return res.status(500).render("500");
+
   const query = await db.getDb().collection("plates").insertOne(newInfo);
 
   res.redirect("/placas");
 });
 
 router.post("/placas/:id/delete", async function (req, res, next) {
-  const admUser = await checkAdm(req);
+  const admUser = res.locals.isAdmin;
   if (!admUser) return res.status(401).render("401-adm");
 
   let dataId = req.params.id;
@@ -643,8 +693,14 @@ router.get("/placas/:id/edit", async function (req, res, next) {
   res.render("editar-placa", { placa: dataToEdit });
 });
 
-router.post("/placas/:id/edit", async function (req, res) {
-  const editId = new ObjectId(req.params.id);
+router.post("/placas/:id/edit", async function (req, res, next) {
+  let editId = req.params.id;
+
+  try {
+    editId = new ObjectId(editId);
+  } catch (error) {
+    return next(error);
+  }
 
   const editPlate = await db
     .getDb()

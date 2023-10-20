@@ -53,8 +53,31 @@ header:hover {
   text-transform: uppercase;
 }
 
+#home-btn {
+  color: white;
+  font-size: 3rem;
+}
+
+#home-btn:hover {
+  color: rgba(26, 133, 233, 0.699);
+}
+
+#home-btn:hover,
 #logo:hover {
   border-bottom: 1px solid gold;
+}
+
+.welcome-message {
+  color: white;
+  font-weight: bold;
+  font-size: 1.3rem;
+  margin-left: 1.22rem;
+  text-shadow: 1px 1px 1px green;
+  cursor: auto;
+}
+
+.welcome-message:hover {
+  text-shadow: 2px 2px 2px yellow;
 }
 
 nav ul {
@@ -128,6 +151,10 @@ td form .edit {
 
 th {
   font-weight: 800;
+}
+
+th:last-of-type {
+  border-bottom-right-radius: 16px;
 }
 
 thead tr:last-child th {
@@ -430,4 +457,8 @@ footer img:hover {
   border: none;
   padding: 0;
   margin: 0;
+}
+
+.white-icon {
+  color: white;
 }

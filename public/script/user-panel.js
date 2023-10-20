@@ -30,7 +30,6 @@ function changePassword() {
 }
 
 logoutButtonElement.addEventListener("click", userLogout);
-admButtonElement.addEventListener("click", adminPanel);
 changePWElement.addEventListener("click", changePassword);
 
 // Botão de Cancelar, dentro do formulário
@@ -83,3 +82,4 @@ function verifyData(event) {
 }
 
 changePWFormElement.addEventListener("submit", verifyData);
+admButtonElement.addEventListener("click", adminPanel);

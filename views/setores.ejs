@@ -16,6 +16,11 @@
       <h1>Controle de Setor</h1>
       <table>
         <thead>
+          <th>
+            <a href="#" class="material-icons button edit white-icon"
+              >table_chart</a
+            >
+          </th>
           <th>Setores Cadastrados</th>
           <th>
             <i id="add" class="btn_add material-icons button delete">add</i>
@@ -56,10 +61,17 @@
 
       <section id="add_form">
         <form action="/setores" method="POST" id="add_row_form" class="modal">
-          <label for="">Nome completo do Setor</label>
-          <input type="text" minlength="4" name="name" required />
-          <label for="">Abreviação</label>
-          <input type="text" minlength="3" maxlength="5" name="abv" required />
+          <label for="name">Nome completo do Setor</label>
+          <input type="text" minlength="4" name="name" id="name" required />
+          <label for="abv">Abreviação</label>
+          <input
+            type="text"
+            minlength="3"
+            maxlength="5"
+            id="abv"
+            name="abv"
+            required
+          />
 
           <div id="buttons">
             <button type="submit">Enviar</button>

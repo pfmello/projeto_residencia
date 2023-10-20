@@ -13,16 +13,24 @@
         method="POST"
         id="add_row_form"
       >
-        <label for="">Nome do Motorista</label>
+        <label for="firstName">Nome do Motorista</label>
         <input
           type="text"
           value="<%= motorista.firstName %>"
           name="firstName"
+          id="firstName"
         />
-        <label for="">Sobrenome</label>
-        <input type="text" value="<%= motorista.surname %>" name="surname" />
+        <label for="surname">Sobrenome</label>
+        <input
+          type="text"
+          value="<%= motorista.surname %>"
+          name="surname"
+          id="surname"
+        />
 
-        <button type="submit">Enviar</button>
+        <div id="buttons">
+          <button type="submit">Enviar</button>
+        </div>
       </form>
     </main>
     <footer><%- include ('includes/footer') %></footer>

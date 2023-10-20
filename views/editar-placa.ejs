@@ -13,17 +13,24 @@
         method="POST"
         id="add_row_form"
       >
-        <label for="">Registro da Placa</label>
-        <input type="text" value="<%= placa.register %>" name="register" />
-        <label for="">Quilometragem Atual</label>
+        <label for="register">Registro da Placa</label>
+        <input
+          type="text"
+          value="<%= placa.register %>"
+          id="register"
+          name="register"
+        />
+        <label for="km_dev">Quilometragem Atual</label>
         <input
           type="number"
           value="<%= placa.km_dev %>"
+          id="km_dev"
           name="km_dev"
           min="<%= placa.km_dev %>"
         />
-
-        <button type="submit">Enviar</button>
+        <div id="buttons">
+          <button type="submit">Enviar</button>
+        </div>
       </form>
     </main>
     <footer><%- include ('includes/footer') %></footer>

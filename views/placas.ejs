@@ -16,6 +16,11 @@
       <h1>Controle de Placas</h1>
       <table>
         <thead>
+          <th>
+            <a href="#" class="material-icons button edit white-icon"
+              >car_rental</a
+            >
+          </th>
           <th>Placas Cadastradas</th>
           <th>
             <i id="add" class="btn_add material-icons button delete">add</i>
@@ -57,10 +62,16 @@
 
       <section id="add_form">
         <form action="/placas" method="POST" id="add_row_form" class="modal">
-          <label for="">Placa</label>
-          <input type="text" minlength="4" name="register" required />
-          <label for="">Quilometragem Atual</label>
-          <input type="number" name="km_dev" min="0" required />
+          <label for="register">Placa</label>
+          <input
+            type="text"
+            minlength="4"
+            id="register"
+            name="register"
+            required
+          />
+          <label for="km_dev">Quilometragem Atual</label>
+          <input type="number" id="km_dev" name="km_dev" min="0" required />
 
           <div id="buttons">
             <button type="submit">Enviar</button>

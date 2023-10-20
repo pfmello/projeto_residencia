@@ -16,6 +16,11 @@
       <h1>Controle de Motoristas</h1>
       <table>
         <thead>
+          <th>
+            <a href="#" class="material-icons button edit white-icon"
+              >directions_car</a
+            >
+          </th>
           <th>Motoristas Cadastrados</th>
           <th>
             <i id="add" class="btn_add material-icons button delete">add</i>
@@ -65,10 +70,22 @@
           id="add_row_form"
           class="modal"
         >
-          <label for="">Nome</label>
-          <input type="text" name="firstName" minlength="4" required />
-          <label for="">Sobrenome</label>
-          <input type="text" name="surname" minlength="3" required />
+          <label for="firstName">Nome</label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            minlength="4"
+            required
+          />
+          <label for="surname">Sobrenome</label>
+          <input
+            type="text"
+            id="surname"
+            name="surname"
+            minlength="3"
+            required
+          />
 
           <div id="buttons">
             <button type="submit">Enviar</button>

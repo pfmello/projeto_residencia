@@ -39,6 +39,75 @@ app.use(
     },
   })
 );
+
+app.use(function checkOrigin(req, res, next) {
+  if (req.method === "POST") {
+    const referer = req.get("Referer");
+
+    if (referer && referer.startsWith("http://127.0.0.1:3000/")) {
+      // Request is a POST from your own server
+      next();
+    } else {
+      // Request is a POST from a different origin, reject it
+      console.log(
+        "houve tentativa de acessar o servidor através de origens diferentes !"
+      );
+      res.status(401).render("401");
+    }
+  } else {
+    // Request is not a POST, allow it to proceed
+    next();
+  }
+});
+
+app.use(async function (req, res, next) {
+  const user = req.session.user;
+  const isAuth = req.session.isAuthenticated;
+
+  if (isAuth) {
+    const dbUser = await db
+      .getDb()
+      .collection("users")
+      .findOne({ login: user.login });
+
+    const isAdmin = dbUser.isAdmin;
+
+    res.locals.isAuth = isAuth;
+    res.locals.isAdmin = isAdmin;
+    res.locals.username = user.login;
+  }
+
+  next();
+});
+
+let loginAttempts = {};
+
+app.use(function trackLoginAttempts(req, res, next) {
+  const ip = req.ip;
+
+  // Verifica se a requisição é uma tentativa de login
+  if (req.path === "/login") {
+    if (!loginAttempts[ip]) {
+      loginAttempts[ip] = 1;
+    } else {
+      loginAttempts[ip]++;
+    }
+  }
+
+  if (loginAttempts[ip] >= 3) {
+    console.log(
+      `IP ${ip} excedeu o limite de tentativas de login ! . Acesso dele está bloqueado.`
+    );
+    res.status(401).render("register-info", {
+      title: "ERROU !",
+      h1Text: "Banido !",
+      pText: "Errou feio, errou rude !",
+    });
+  } else {
+    next();
+  }
+});
+
 app.use(tableRoutes);
 
 app.use(function (error, req, res, next) {
