@@ -3,6 +3,7 @@ const path = require("path");
 
 // Função para utilizar o Framework de Node Express (recursos para construção de servidores web)
 const express = require("express");
+
 //Pacote para controlar sessões e cookies
 const session = require("express-session");
 //Pacote para guardar informações de sessões no MongoDB
@@ -10,6 +11,7 @@ const mongodbStore = require("connect-mongodb-session");
 
 // Configura rotas do servidor
 const db = require("./data/database");
+const loginManager = require("./routes/login-manager");
 const tableRoutes = require("./routes/tabela");
 
 const MongoDBStore = mongodbStore(session);
@@ -28,6 +30,8 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true })); // Função middleware necessária para dados do formulário
 app.use(express.static("public")); //  Arquivos estáticos (e.g. CSS files, Script Javascript)
+
+// Configuração cookie e duração do mesmo
 app.use(
   session({
     secret: "SEI#$%@./ADMIN-~~pass",
@@ -80,28 +84,17 @@ app.use(async function (req, res, next) {
   next();
 });
 
-let loginAttempts = {};
-
 app.use(function trackLoginAttempts(req, res, next) {
   const ip = req.ip;
 
-  // Verifica se a requisição é uma tentativa de login
-  if (req.path === "/login") {
-    if (!loginAttempts[ip]) {
-      loginAttempts[ip] = 1;
-    } else {
-      loginAttempts[ip]++;
-    }
-  }
-
-  if (loginAttempts[ip] >= 3) {
+  if (loginManager.getLoginAttempts(ip) >= 3) {
     console.log(
-      `IP ${ip} excedeu o limite de tentativas de login ! . Acesso dele está bloqueado.`
+      `IP ${ip} excedeu o limite de tentativas de login! Acesso dele está bloqueado.`
     );
     res.status(401).render("register-info", {
-      title: "ERROU !",
-      h1Text: "Banido !",
-      pText: "Errou feio, errou rude !",
+      title: "ERROU!",
+      h1Text: "Banido!",
+      pText: "Errou feio, errou rude!",
     });
   } else {
     next();

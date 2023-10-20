@@ -2,6 +2,7 @@ const express = require("express");
 const mongodb = require("mongodb");
 const bcrypt = require("bcryptjs");
 
+const loginManager = require("../routes/login-manager");
 const db = require("../data/database");
 
 const ObjectId = mongodb.ObjectId;
@@ -16,6 +17,8 @@ router.get("/", async function (req, res) {
     sessionInputData = {
       savedLogin: "",
       savedPassword: "",
+      savedRegisterMail: "",
+      savedRegisterLogin: "",
     };
   }
 
@@ -76,12 +79,23 @@ router.post("/register", async function (req, res) {
   ]);
 
   if (existingUser) {
+    req.session.inputData = {
+      savedRegisterMail: enteredEmail,
+    };
+    req.session.save();
+
     return renderRegisterInfo(
       "Errou !",
       "Esse usuário já existe !",
       "Tente novamente com outro nome de usuário !"
     );
   } else if (existingEmail) {
+    req.session.inputData = {
+      savedRegisterLogin: enteredLogin,
+    };
+
+    req.session.save();
+
     return renderRegisterInfo(
       "Errou !",
       "Já existe um usuário cadastrado com esse email !",
@@ -97,6 +111,11 @@ router.post("/register", async function (req, res) {
         isAdmin: false,
       };
       const query = await db.getDb().collection("users").insertOne(newUser);
+
+      req.session.inputData = {
+        savedLogin: enteredLogin,
+      };
+      req.session.save();
 
       return renderRegisterInfo(
         "Registrado com sucesso !",
@@ -119,6 +138,8 @@ router.post("/register", async function (req, res) {
 });
 
 router.post("/login", async function (req, res) {
+  const ip = req.ip;
+
   const userData = req.body;
 
   if (!userData) return res.status(500).render("500");
@@ -133,6 +154,9 @@ router.post("/login", async function (req, res) {
     .findOne({ login: enteredUser });
 
   if (!existingUser) {
+    // Aumenta a quantidade de tentativas de login
+    loginManager.incrementLoginAttempt(ip);
+
     req.session.inputData = null;
     req.session.save();
     return renderLoginInfo(
@@ -145,6 +169,9 @@ router.post("/login", async function (req, res) {
   const validPassword = await bcrypt.compare(enteredPw, existingUser.password);
 
   if (!validPassword) {
+    // Aumenta a quantidade de tentativas de login
+    loginManager.incrementLoginAttempt(ip);
+
     req.session.inputData = {
       savedLogin: enteredUser,
     };
@@ -157,6 +184,11 @@ router.post("/login", async function (req, res) {
       "Senha totalmente errada !"
     );
   }
+
+  // Executa apenas se o login for sucesso
+
+  // Reseta tentativas de login
+  loginManager.resetLoginAttempts(ip);
 
   req.session.user = {
     id: existingUser._id,
@@ -171,7 +203,6 @@ router.post("/login", async function (req, res) {
   };
 
   req.session.save(function () {
-    loginAttempts[req.ip] = 0;
     console.log(`Usuário ${existingUser.login} autenticado !`);
     return res.redirect("/");
   });
