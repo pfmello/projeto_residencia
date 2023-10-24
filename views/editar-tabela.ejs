@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <%- include('includes/head', {title: "Editar Setor"}) %>
+  </head>
+  <body>
+    <header><%- include('includes/header') %></header>
+    <main>
+      <h1>Editando <%= dado.driver.firstName %></h1>
+
+      <form
+        action="/tabela/<%= dado._id %>/edit"
+        method="POST"
+        id="add_row_form"
+      >
+        <div class="data-hora">
+          <label for="data_retirada">Data Retirada</label>
+          <input
+            type="date"
+            id="data_retirada"
+            name="data_retirada"
+            required
+            value="<%= dado.data_retirada %>"
+          />
+
+          <label for="hora_retirada">Hora Retirada</label>
+          <input
+            type="time"
+            id="hora_retirada"
+            name="hora_retirada"
+            required
+            value="<%= dado.hora_retirada %>"
+          />
+        </div>
+
+        <label for="plate">Placa e Km Retirada</label>
+        <select name="plate" id="plate" required>
+          <option value="<%= dado.plate._id %>" selected>
+            <%= dado.plate.register %> - <%= dado.plate.km_dev %> Kms atuais
+            ==== SELECIONADO PELO USUÁRIO
+          </option>
+          <hr />
+          <% for (const plate of plates) { %>
+          <option value="<%= plate._id %>">
+            <%= plate.register %> - <%= plate.km_dev %> Kms atuais
+          </option>
+          <% } %>
+        </select>
+
+        <label for="driver">Motorista</label>
+        <select name="driver" id="driver" required>
+          <option value="<%= dado.driver._id %>" selected>
+            <%= dado.driver.firstName %> ==== SELECIONADO PELO USUÁRIO
+          </option>
+          <% for (const driver of drivers) { %>
+          <option value="<%= driver._id %>"><%= driver.firstName %></option>
+          <% } %>
+        </select>
+
+        <label for="sector">Setor</label>
+        <select id="sector" name="sector" required>
+          <option value="<%= dado.sector._id %>" selected>
+            <%= dado.sector.abv %> ==== SELECIONADO PELO USUÁRIO
+          </option>
+          <% for (const sector of sectors) { %>
+          <option value="<%= sector._id %>"><%= sector.abv %></option>
+          <% } %>
+        </select>
+
+        <label for="destino">Destino</label>
+        <input
+          type="text"
+          id="destino"
+          name="destino"
+          required
+          value="<%= dado.destino %>"
+        />
+
+        <label for="ass_ret">Assinatura Retirada</label>
+        <input
+          type="text"
+          id="ass_ret"
+          name="ass_ret"
+          value="<%= dado.ass_ret %>"
+          disabled
+        />
+        <hr />
+
+        <div class="data-hora">
+          <label for="data_devolucao">Data Devolução</label>
+          <input
+            type="date"
+            id="data_devolucao"
+            name="data_devolucao"
+            required
+            value="<%= dado.data_devolucao %>"
+          />
+
+          <label for="hora_devolucao">Hora Devolução</label>
+          <input
+            type="time"
+            name="hora_devolucao"
+            id="hora_devolucao"
+            required
+            value="<%= dado.hora_devolucao %>"
+          />
+        </div>
+
+        <label for="km_dev">Km Devolução</label>
+        <input
+          type="number"
+          name="km_dev"
+          id="km_dev"
+          required
+          value="<%= dado.plate.km_dev %>"
+        />
+
+        <label for="ass_dev">Assinatura Devolução </label>
+        <input
+          type="text"
+          id="ass_dev"
+          name="ass_dev"
+          disabled
+          value="<%= dado.ass_dev %>"
+        />
+
+        <div id="buttons">
+          <button type="submit">Enviar</button>
+        </div>
+      </form>
+    </main>
+    <footer><%- include ('includes/footer') %></footer>
+  </body>
+</html>

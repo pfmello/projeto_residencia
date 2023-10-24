@@ -38,3 +38,10 @@ function confirmAdmin() {
   if (agree) return true;
   else return false;
 }
+
+function userActive() {
+  alert(
+    "A conta desse usuário esta ativa !" +
+      "\nPara desativar, clicar no botão de deletar !"
+  );
+}

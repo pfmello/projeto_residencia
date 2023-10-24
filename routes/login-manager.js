@@ -1,3 +1,5 @@
+// Este código traceia o número de tenttivas de login
+
 let loginAttempts = {};
 
 module.exports = {

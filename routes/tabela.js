@@ -120,7 +120,7 @@ router.post("/register", async function (req, res) {
       return renderRegisterInfo(
         "Registrado com sucesso !",
         "Parabéns, você foi registrado !",
-        "Agora você pode ir no espelho bater palmas para si mesmo !"
+        "Um ADM ainda precisa ativar a sua conta!"
       );
     } catch (error) {
       console.error("Erro ao inserir usuário:", error);
@@ -185,6 +185,21 @@ router.post("/login", async function (req, res) {
     );
   }
 
+  if (!existingUser.isActive) {
+    req.session.inputData = {
+      savedLogin: enteredUser,
+      savedPassword: enteredPw,
+    };
+
+    req.session.save();
+
+    return renderLoginInfo(
+      "Erro !",
+      "Sua conta ainda não está ativada !",
+      "Um ADM ainda precisa ativar a sua conta !"
+    );
+  }
+
   // Executa apenas se o login for sucesso
 
   // Reseta tentativas de login
@@ -234,7 +249,10 @@ router.get("/adm", async function (req, res) {
     const users = await db
       .getDb()
       .collection("users")
-      .find({}, { projection: { login: 1, email: 1, isAdmin: 1, _id: 1 } })
+      .find(
+        {},
+        { projection: { login: 1, email: 1, isAdmin: 1, _id: 1, isActive: 1 } }
+      )
       .toArray();
 
     return res.render("adm-panel", { users });
@@ -286,14 +304,41 @@ router.get("/:id/remove_adm", async function (req, res) {
       .updateOne({ _id: userId }, { $set: { isAdmin: false } });
 
     if (result.modifiedCount === 1) {
-      console.log("Usuario foi removido como admin!");
+      console.log("Um usuário foi removido como admin!");
     } else {
       console.log("Nenhum usuário foi modificado. Verifique o ID.");
     }
 
     res.redirect("/adm");
   } catch (error) {
-    console.log("Erro ao tentar remover um usuário como administrador:");
+    console.log("Erro ao tentar remover um usuário como administrador");
+    res.status(500).render("505");
+  }
+});
+
+router.get("/:id/activate_account", async function (req, res) {
+  const admUser = res.locals.isAdmin;
+  if (!admUser) return res.status(401).render("401-adm");
+
+  let userId = req.params.id;
+
+  try {
+    userId = new ObjectId(userId);
+
+    const result = await db
+      .getDb()
+      .collection("users")
+      .updateOne({ _id: userId }, { $set: { isActive: true } });
+
+    if (result.modifiedCount === 1) {
+      console.log("Um usuário teve a conta ativada !");
+    } else {
+      console.log("Nenhum usuário foi modificado. Verifique o ID.");
+    }
+
+    res.redirect("/adm");
+  } catch (error) {
+    console.log("Erro ao tentar ativar a conta de um usuário");
     res.status(500).render("505");
   }
 });
@@ -366,7 +411,8 @@ router.post("/:id/change_password", async function (req, res) {
 // Página da tabela
 router.get("/tabela", async function (req, res) {
   // Verifica se o usuário está autenticado
-  if (!res.locals.isAuth) return res.status(401).render("401");
+  if (!res.locals.isAuth || !res.locals.isActive)
+    return res.status(401).render("401");
 
   //Apenas com usuários autenticados
   try {
@@ -382,8 +428,14 @@ router.get("/tabela", async function (req, res) {
       let firstDateToConvert = new Date(td.data_retirada + "T00:00:00Z"); // Convert to UTC
       let returnDateToConvert = new Date(td.data_devolucao + "T00:00:00Z"); // Convert to UTC
 
-      firstDateToConvert.setDate(firstDateToConvert.getUTCDate()); // Set day based on UTC
-      returnDateToConvert.setDate(returnDateToConvert.getUTCDate()); // Set day based on UTC
+      // Adicionando o fuso horário local
+      firstDateToConvert.setMinutes(
+        firstDateToConvert.getMinutes() + firstDateToConvert.getTimezoneOffset()
+      );
+      returnDateToConvert.setMinutes(
+        returnDateToConvert.getMinutes() +
+          returnDateToConvert.getTimezoneOffset()
+      );
 
       td.data_retirada = firstDateToConvert.toLocaleDateString("pt-BR", {
         year: "numeric",
@@ -500,9 +552,93 @@ router.get("/tabela/:id/edit", async function (req, res) {
       .collection("data")
       .findOne({ _id: editId });
 
-    res.render("editar", { dado: dataToEdit });
+    const [sectors, drivers, plates] = await Promise.all([
+      db.getDb().collection("sectors").find().toArray(),
+      db.getDb().collection("drivers").find().toArray(),
+      db.getDb().collection("plates").find().toArray(),
+    ]);
+
+    res.render("editar-tabela", { dado: dataToEdit, sectors, drivers, plates });
   } catch (error) {
     return res.status(404).render("404");
+  }
+});
+
+router.post("/tabela/:id/edit", async function (req, res, next) {
+  let editId = req.params.id;
+
+  let sectorId = req.body.sector;
+  let driverId = req.body.driver;
+  let plateId = req.body.plate;
+
+  try {
+    editId = new ObjectId(editId);
+    sectorId = new ObjectId(sectorId);
+    driverId = new ObjectId(driverId);
+    plateId = new ObjectId(plateId);
+  } catch (error) {
+    return next(error);
+  }
+
+  const [selectedDriver, selectedSector, selectedPlate] = await Promise.all([
+    db.getDb().collection("drivers").findOne({ _id: driverId }),
+    db.getDb().collection("sectors").findOne({ _id: sectorId }),
+    db.getDb().collection("plates").findOne({ _id: plateId }),
+  ]);
+
+  const kmUsuario = parseInt(req.body.km_dev);
+  const kmTabela = parseInt(selectedPlate.km_dev);
+
+  console.log("km usuario" + kmUsuario);
+  console.log("km tabela" + kmTabela);
+
+  if (kmUsuario >= kmTabela) {
+    const query = await db
+      .getDb()
+      .collection("data")
+      .updateOne(
+        { _id: editId },
+        {
+          $set: {
+            data_retirada: req.body.data_retirada,
+            hora_retirada: req.body.hora_retirada,
+            plate: {
+              _id: plateId,
+              register: selectedPlate.register,
+              km_ret: selectedPlate.km_dev,
+              km_dev: req.body.km_dev,
+            },
+            driver: {
+              _id: driverId,
+              ...selectedDriver,
+            },
+            sector: {
+              _id: sectorId,
+              ...selectedSector,
+            },
+            destino: req.body.destino,
+            data_devolucao: req.body.data_devolucao,
+            hora_devolucao: req.body.hora_devolucao,
+          },
+        }
+      );
+
+    const query2 = await db
+      .getDb()
+      .collection("plates")
+      .updateOne(
+        { _id: plateId },
+        {
+          $set: {
+            km_dev: req.body.km_dev,
+          },
+        }
+      );
+
+    res.redirect("/tabela");
+  } else {
+    let erro = selectedPlate.km_dev;
+    res.render("erro-km", { erro });
   }
 });
 

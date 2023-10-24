@@ -39,7 +39,7 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      maxAge: 3600000, // 1 hora em milisegundos
+      maxAge: 28800000, // 8 houras em milisegundos
     },
   })
 );
@@ -54,7 +54,7 @@ app.use(function checkOrigin(req, res, next) {
     } else {
       // Request is a POST from a different origin, reject it
       console.log(
-        "houve tentativa de acessar o servidor através de origens diferentes !"
+        "houve tentativa de acessar o servidor através de origens duvidosas - o acesso foi bloqueado !"
       );
       res.status(401).render("401");
     }
@@ -64,6 +64,7 @@ app.use(function checkOrigin(req, res, next) {
   }
 });
 
+// RES.LOCALS, VARIAVEIS GLOBAIS
 app.use(async function (req, res, next) {
   const user = req.session.user;
   const isAuth = req.session.isAuthenticated;
@@ -75,10 +76,12 @@ app.use(async function (req, res, next) {
       .findOne({ login: user.login });
 
     const isAdmin = dbUser.isAdmin;
+    const isActive = dbUser.isActive;
 
     res.locals.isAuth = isAuth;
     res.locals.isAdmin = isAdmin;
     res.locals.username = user.login;
+    res.locals.isActive = isActive;
   }
 
   next();

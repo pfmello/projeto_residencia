@@ -33,6 +33,7 @@
         <tr>
           <th>Login</th>
           <th>Email</th>
+          <th>Ativado</th>
           <th>Admin</th>
         </tr>
 
@@ -42,6 +43,23 @@
         <tr>
           <td><%= user.login %></td>
           <td><%= user.email %></td>
+          <td>
+            <% if(user.isActive) { %>
+            <a
+              href="#"
+              class="material-icons button edit"
+              onClick="return userActive()"
+              >done</a
+            >
+            <% } else { %>
+            <a
+              href="/<%= user._id %>/activate_account"
+              class="material-icons button delete"
+              onClick="return confirmAdmin()"
+              >cancel</a
+            >
+            <% } %>
+          </td>
           <td>
             <% if(user.isAdmin) { %>
             <a
